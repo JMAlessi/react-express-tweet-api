@@ -1,5 +1,6 @@
 import logo from './logo.svg';
 import './css/App.css';
+import TweetFeed from './components/TweetFeed';
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
           J. A.
         </h1>
       </header>
+      <TweetFeed />
     </div>
   );
 }
