@@ -1,9 +1,6 @@
-import { call, put } from 'redux-saga/effects';
+import { call, put, takeEvery } from 'redux-saga/effects';
 import { getApi } from '../requests/tweets';
-import {
-	GET_TWEETS_SUCCESS,
-	GET_TWEETS_FAILED,
-} from '../../ducks/tweets/success';
+import { GET_TWEETS_SUCCESS, GET_TWEETS_FAILED } from '../../ducks/tweets';
 
 export function* fetchTweets(action) {
 	try {
