@@ -18,9 +18,5 @@
 		"express": "^4.17.2",
 		"needle": "^2.5.2",
 		"socket.io": "^4.5.0"
-	},
-	"devDependencies": {
-		"nodemon": "^2.0.15",
-		"sass": "^1.62.0"
 	}
 }
