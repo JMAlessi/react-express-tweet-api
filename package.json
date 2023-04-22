@@ -2,15 +2,15 @@
 	"name": "tweet-streamer",
 	"version": "1.0.0",
 	"description": "An app that fetches tweets.",
-	"main": "server/index.js",
+	"main": "server.js",
 	"scripts": {
 		"client-install": "cd client && npm install",
-		"start": "node server/index.js",
-		"server": "nodemon server/index.js",
+		"start": "node server.js",
+		"server": "nodemon server.js",
 		"client": "npm start --prefix client",
 		"dev": "concurrently \"npm run server\" \"npm run client\""
 	},
-	"author": "J. A. Software",
+	"author": "J. A. Software Developer",
 	"license": "ISC",
 	"dependencies": {
 		"concurrently": "^7.1.0",
