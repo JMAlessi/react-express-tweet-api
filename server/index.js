@@ -4,12 +4,16 @@ const express = require('express');
 const socketIo = require('socket.io');
 const needle = require('needle');
 const config = require('dotenv').config();
+const cors = require('cors');
 const TOKEN = process.env.TWITTER_BEARER_TOKEN;
 const PORT = process.env.PORT || 3001;
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
+
+// Set up CORS middleware to allow cross-origin requests
+app.use(cors());
 
 app.get('/', (req, res) => {
 	res.send('Server');
@@ -106,7 +110,7 @@ io.on('connection', async () => {
 	let currentRules;
 
 	try {
-		//   Get all stream rules
+		// Get all stream rules
 		currentRules = await getRules();
 
 		// Delete all stream rules
