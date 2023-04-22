@@ -5,16 +5,17 @@ import tweetsReducer from './ducks/tweets';
 import { watcherSaga } from './sagas';
 
 const reducer = combineReducers({
-    tweets: tweetsReducer,
+	tweets: tweetsReducer,
 });
 
 const sagaMiddleware = createSagaMiddleware();
 
-const middleware = [sagaMiddleware,];
+const middleware = [sagaMiddleware];
 
-const store = configureStore(
-    reducer, {}, applyMiddleware(...middleware)
-);
+const store = configureStore({
+	reducer,
+	middleware,
+});
 
 sagaMiddleware.run(watcherSaga);
 
