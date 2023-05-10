@@ -1,142 +1,142 @@
 const http = require('http');
 const path = require('path');
 const express = require('express');
-const socketIo = require('socket.io');
-const needle = require('needle');
-const config = require('dotenv').config();
 const cors = require('cors');
-const TOKEN = process.env.TWITTER_BEARER_TOKEN;
-const PORT = process.env.PORT || 3001;
+const ReactDOMServer = require('react-dom/server');
+const fetch = require('node-fetch');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
 
-// Set up CORS middleware to allow cross-origin requests
+const PORT = process.env.PORT || 3001;
+
 app.use(cors());
+app.use(express.json());
 
+// Import redux-related files
+const { createStore, applyMiddleware } = require('redux');
+const thunkMiddleware = require('redux-thunk').default;
+const { Provider } = require('react-redux');
+const rootReducer = require('./redux/reducers').default;
+
+// Import React components
+const App = require('./App').default;
+const { ViewA, ViewB } = require('./components');
+
+// Set up Redux store
+const store = createStore(rootReducer, applyMiddleware(thunkMiddleware));
+
+// Set up React app with Redux provider
 app.get('/', (req, res) => {
-	res.send('Server');
+	const jsx = (
+		<Provider store={store}>
+			<App />
+		</Provider>
+	);
+	const html = ReactDOMServer.renderToString(jsx);
+
+	res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Twitter Stream</title>
+      </head>
+      <body>
+        <div id="root">${html}</div>
+        <script src="/static/js/main.js"></script>
+      </body>
+    </html>
+  `);
 });
 
-app.get('/tweets', (req, res) => {
-	res.send('...');
+// Define routes for ViewA and ViewB
+app.get('/view-a', (req, res) => {
+	const jsx = (
+		<Provider store={store}>
+			<ViewA />
+		</Provider>
+	);
+	const html = ReactDOMServer.renderToString(jsx);
+
+	res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Twitter Stream - View A</title>
+      </head>
+      <body>
+        <div id="root">${html}</div>
+        <script src="/static/js/main.js"></script>
+      </body>
+    </html>
+  `);
 });
 
-app.use(express.static(path.resolve(__dirname, '../', 'client', 'build')));
+app.get('/view-b', (req, res) => {
+	const jsx = (
+		<Provider store={store}>
+			<ViewB />
+		</Provider>
+	);
+	const html = ReactDOMServer.renderToString(jsx);
 
-app.get('*', (req, res) => {
-	res.sendFile(path.resolve(__dirname, '../', 'client', 'build', 'index.html'));
+	res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Twitter Stream - View B</title>
+      </head>
+      <body>
+        <div id="root">${html}</div>
+        <script src="/static/js/main.js"></script>
+      </body>
+    </html>
+  `);
 });
 
-const rulesURL = 'https://api.twitter.com/2/tweets/search/stream/rules';
-const streamURL =
-	'https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics&expansions=author_id';
+// Serve static files
+app.use(
+	'/static',
+	express.static(path.join(__dirname, '../client/build/static'))
+);
 
-const rules = [{ value: 'pizza' }];
-
-// Get stream rules
-async function getRules() {
-	const response = await needle('get', rulesURL, {
-		headers: {
-			Authorization: `Bearer ${TOKEN}`,
-		},
-	});
-	console.log(response.body);
-	return response.body;
-}
-
-// Set stream rules
-async function setRules() {
-	const data = {
-		add: rules,
-	};
-
-	const response = await needle('post', rulesURL, data, {
-		headers: {
-			'content-type': 'application/json',
-			Authorization: `Bearer ${TOKEN}`,
-		},
-	});
-
-	return response.body;
-}
-
-// Delete stream rules
-async function deleteRules(rules) {
-	if (!Array.isArray(rules.data)) {
-		return null;
-	}
-
-	const ids = rules.data.map((rule) => rule.id);
-
-	const data = {
-		delete: {
-			ids: ids,
-		},
-	};
-
-	const response = await needle('post', rulesURL, data, {
-		headers: {
-			'content-type': 'application/json',
-			Authorization: `Bearer ${TOKEN}`,
-		},
-	});
-
-	return response.body;
-}
-
-function streamTweets(socket) {
-	const stream = needle.get(streamURL, {
-		headers: {
-			Authorization: `Bearer ${TOKEN}`,
-		},
-	});
-
-	stream.on('data', (data) => {
-		try {
-			const json = JSON.parse(data);
-			console.log(json);
-			socket.emit('tweet', json);
-		} catch (error) {}
-	});
-
-	return stream;
-}
-
-io.on('connection', async () => {
-	console.log('Client connected...');
-
-	let currentRules;
+// Set up API endpoint to fetch tweets
+app.get('/tweets', async (req, res) => {
+	const { view } = req.query;
+	const username = view === 'Elon Musk' ? 'elonmusk' : 'Tesla';
 
 	try {
-		// Get all stream rules
-		currentRules = await getRules();
+		const response = await fetch(
+			`https://api.twitter.com/2/users/by/username/${username}`,
+			{
+				headers: {
+					Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
+				},
+			}
+		);
 
-		// Delete all stream rules
-		await deleteRules(currentRules);
+		const data = await response.json();
+		const userId = data.data.id;
 
-		// Set rules based on array above
-		await setRules();
+		const tweetsResponse = await fetch(
+			`https://api.twitter.com/2/users/${userId}/tweets`,
+			{
+				headers: {
+					Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
+				},
+			}
+		);
+		const tweetsData = await tweetsResponse.json();
+
+		res.json(tweetsData);
 	} catch (error) {
 		console.error(error);
-		process.exit(1);
+		res.status(500).json({ error: 'An error occurred while fetching tweets.' });
 	}
-
-	const filteredStream = streamTweets(io);
-
-	let timeout = 0;
-	filteredStream.on('timeout', () => {
-		// Reconnect on error
-		console.warn('A connection error occurred. Reconnecting…');
-		setTimeout(() => {
-			timeout++;
-			streamTweets(io);
-		}, 2 ** timeout);
-		streamTweets(io);
-	});
-});
-
-server.listen(PORT, () => {
-	console.log(`Listening on port ${PORT}`);
 });
