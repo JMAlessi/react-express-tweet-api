@@ -1,4 +1,4 @@
-# React-Express-Tweet-API
+# Live-Tweets-API
 
 A MERN stack app that uses the Twitter API.
 
