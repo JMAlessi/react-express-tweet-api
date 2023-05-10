@@ -8,7 +8,7 @@ const NavigationBar = () => {
 				<li>
 					<NavLink
 						to="/view-a"
-						activeClassName="active"
+						activeclassname="active"
 					>
 						View A
 					</NavLink>
@@ -16,7 +16,7 @@ const NavigationBar = () => {
 				<li>
 					<NavLink
 						to="/view-b"
-						activeClassName="active"
+						activeclassname="active"
 					>
 						View B
 					</NavLink>

@@ -5,13 +5,14 @@ const initialState = {
 	view: 'Elon Musk',
 };
 
-const rootReducer = createReducer(initialState, {
-	UPDATE_TWEETS: (state, action) => {
-		state.tweets = action.payload;
-	},
-	UPDATE_VIEW: (state, action) => {
-		state.view = action.payload;
-	},
+const rootReducer = createReducer(initialState, (builder) => {
+	builder
+		.addCase('UPDATE_TWEETS', (state, action) => {
+			state.tweets = action.payload;
+		})
+		.addCase('UPDATE_VIEW', (state, action) => {
+			state.view = action.payload;
+		});
 });
 
 export default rootReducer;
