@@ -1,22 +1,24 @@
-import { configureStore } from '@reduxjs/toolkit';
-import { combineReducers, applyMiddleware } from 'redux';
+import {
+	configureStore,
+	getDefaultMiddleware,
+	createAction,
+} from '@reduxjs/toolkit';
 import createSagaMiddleware from 'redux-saga';
-import tweetsReducer from './ducks/tweets';
-import { watcherSaga } from './sagas';
-
-const reducer = combineReducers({
-	tweets: tweetsReducer,
-});
+import rootReducer from './reducers';
+import rootSaga from './sagas';
 
 const sagaMiddleware = createSagaMiddleware();
 
-const middleware = [sagaMiddleware];
+const fetchViewATweets = createAction('FETCH_VIEW_A_TWEETS');
+const fetchViewBTweets = createAction('FETCH_VIEW_B_TWEETS');
+
+const middleware = [...getDefaultMiddleware(), sagaMiddleware];
 
 const store = configureStore({
-	reducer,
+	reducer: rootReducer,
 	middleware,
 });
 
-sagaMiddleware.run(watcherSaga);
+sagaMiddleware.run(rootSaga);
 
-export default store;
+export { store, fetchViewATweets, fetchViewBTweets };
