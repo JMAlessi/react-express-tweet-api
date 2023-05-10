@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import NavigationBar from './components/NavigationBar';
 import ViewA from './components/ViewA';
 import ViewB from './components/ViewB';
@@ -11,17 +11,16 @@ const App = () => {
 				<NavigationBar />
 				<Routes>
 					<Route
-						exact
 						path="/"
-						component={ViewA}
+						element={<ViewA />}
 					/>
 					<Route
 						path="/view-a"
-						component={ViewA}
+						element={<ViewA />}
 					/>
 					<Route
 						path="/view-b"
-						component={ViewB}
+						element={<ViewB />}
 					/>
 				</Routes>
 			</div>

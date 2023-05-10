@@ -13,7 +13,7 @@ const ViewB = ({ viewBTweets, fetchViewBTweets }) => {
 
 	return (
 		<div>
-			<h2>{`${name} + Tweets`}</h2>
+			<h2>{`${name} Tweets`}</h2>
 			{viewBTweets?.map((tweet) => (
 				<div key={tweet.id_str || tweet.id}>
 					<p>{tweet?.full_text}</p>
